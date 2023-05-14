@@ -32,4 +32,25 @@ router.post("/employees/:employeeId/salary-history", auth, async (req, res) => {
   }
 });
 
+//Get employee's salary history endpoint
+router.get("/employees/:employeeId/salary-history", auth, async (req, res) => {
+  const employeeId = parseInt(req.params.employeeId);
+
+  try {
+    // Check if the authenticated user has the privilege to view salary history
+    if (req.employee.role !== "SUPER_ADMIN" && req.employee.role !== "HR") {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const salaryHistory = await prisma.salaryHistory.findMany({
+      where: { employeeId: employeeId },
+    });
+
+    return res.json(salaryHistory);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;
