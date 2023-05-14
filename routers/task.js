@@ -44,4 +44,34 @@ router.get("/tasks", auth, async (req, res) => {
   }
 });
 
+//Update task status endpoint
+router.patch("/tasks/:taskId", auth, async (req, res) => {
+  const taskId = parseInt(req.params.taskId);
+  const update = Object.keys(req.body);
+  //if the update is not status, return error
+  if (update.length !== 1 || !update.includes("status")) {
+    return res.status(400).json({ error: "Invalid updates" });
+  }
+  const { status } = req.body;
+  try {
+    const task = await prisma.task.findUnique({
+      where: { id: taskId },
+      include: { employee: true },
+    });
+
+    if (!task) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+
+    const updatedTask = await prisma.task.update({
+      where: { id: taskId },
+      data: { status: status },
+    });
+
+    return res.json(updatedTask);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
 module.exports = router;
