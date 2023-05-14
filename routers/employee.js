@@ -73,4 +73,46 @@ router.post("/employees", auth, async (req, res) => {
   }
 });
 
+//Update employee profile endpoint
+router.patch("/employees/:employeeId", auth, async (req, res) => {
+  // Check if the authenticated user has the privilege to update employee profiles
+  if (req.employee.role !== "SUPER_ADMIN" && req.employee.role !== "HR") {
+    return res.status(403).json({ error: "Access denied" });
+  }
+
+  const employeeId = parseInt(req.params.employeeId);
+  //handle error when updating by field that does not exist in the user.
+  const allowedUpdates = ["name", "birthDate", "password"];
+  const updates = Object.keys(req.body);
+  const isValidOperation = updates.every((update) =>
+    allowedUpdates.includes(update)
+  );
+  if (!isValidOperation)
+    return res.status(400).send({ error: "invalid updates!" });
+
+  try {
+    const employee = await prisma.employee.findUnique({
+      where: { id: employeeId },
+    });
+    updates.forEach((update) => {
+      employee[update] = req.body[update];
+    });
+    //if updates include password, hash it before storing it
+    if (updates.includes("password")) {
+      employee.password = await bcrypt.hash(employee.password, 10);
+    }
+    const updatedEmployee = await prisma.employee.update({
+      where: { id: employeeId },
+      data: {
+        name: employee.name,
+        password: employee.password,
+        birthDate: new Date(employee.birthDate),
+      },
+    });
+    return res.json(updatedEmployee);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
 module.exports = router;
