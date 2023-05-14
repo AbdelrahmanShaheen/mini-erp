@@ -151,7 +151,9 @@ router.get("/employees", auth, async (req, res) => {
       return res.status(403).json({ error: "Access denied" });
     }
 
-    const employees = await prisma.employee.findMany();
+    const employees = await prisma.employee.findMany({
+      include: { tasks: true, salaryHistories: true },
+    });
 
     return res.json(employees);
   } catch (error) {
