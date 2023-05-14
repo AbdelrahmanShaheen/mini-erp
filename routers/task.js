@@ -30,4 +30,18 @@ router.post("/tasks", auth, async (req, res) => {
   }
 });
 
+//Read all tasks endpoint
+router.get("/tasks", auth, async (req, res) => {
+  const employeeId = req.employee.id;
+  try {
+    const tasks = await prisma.task.findMany({
+      where: { employeeId: employeeId },
+    });
+    return res.json(tasks);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;
