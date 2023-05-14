@@ -32,7 +32,7 @@ enum Role{
 
 model Task {
   id          Int      @id @default(autoincrement())
-  name        String
+  name        String  
   deadline    DateTime
   employeeId  Int
   finishedAt  DateTime?
