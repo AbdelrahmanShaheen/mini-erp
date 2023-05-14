@@ -4,4 +4,4 @@
 
 ## Api documentation
 
-- [postman docs](https://web.postman.co/workspace/d0a4a979-54bf-4546-8f57-b1950c2a35a7/documentation/27409038-4d121633-01ff-4972-a269-21b17aa69c1a?entity=&branch=&version=)
+- [postman docs](https://documenter.getpostman.com/view/27409038/2s93eePU9x)
