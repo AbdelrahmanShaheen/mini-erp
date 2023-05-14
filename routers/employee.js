@@ -125,12 +125,35 @@ router.delete("/employees/:employeeId", auth, async (req, res) => {
     if (req.employee.role !== "SUPER_ADMIN" && req.employee.role !== "HR") {
       return res.status(403).json({ error: "Access denied" });
     }
+    const employee = await prisma.employee.findUnique({
+      where: { id: employeeId },
+      include: { tasks: true, salaryHistories: true },
+    });
+    //if employee does not exist, return 404
+    if (!employee) return res.status(404).json({ error: "Employee not found" });
 
     await prisma.employee.delete({
       where: { id: employeeId },
     });
 
     return res.sendStatus(204);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Employee endpoint - Get all employees
+router.get("/employees", auth, async (req, res) => {
+  try {
+    // Check if the authenticated user has the privilege to view all employees
+    if (req.employee.role !== "SUPER_ADMIN" && req.employee.role !== "HR") {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const employees = await prisma.employee.findMany();
+
+    return res.json(employees);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });
