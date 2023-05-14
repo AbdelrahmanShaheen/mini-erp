@@ -3,6 +3,7 @@ const express = require("express");
 const app = express();
 const taskRouter = require("./routers/task");
 const employeeRouter = require("./routers/employee");
+const salaryHistoryRouter = require("./routers/salary_history");
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -13,5 +14,5 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(taskRouter);
 app.use(employeeRouter);
-
+app.use(salaryHistoryRouter);
 module.exports = app;
