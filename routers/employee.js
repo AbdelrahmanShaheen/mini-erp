@@ -44,4 +44,33 @@ router.get("/profile", auth, async (req, res) => {
   }
 });
 
+//Create new employee endpoint
+router.post("/employees", auth, async (req, res) => {
+  const { name, password, role, birthDate } = req.body;
+
+  try {
+    // Check if the authenticated user has the privilege to create a new employee
+    if (req.employee.role !== "SUPER_ADMIN" && req.employee.role !== "HR") {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    // Hash the password before storing it
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const employee = await prisma.employee.create({
+      data: {
+        name: name,
+        password: hashedPassword,
+        role: role,
+        birthDate: new Date(birthDate),
+      },
+    });
+
+    return res.json(employee);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;
