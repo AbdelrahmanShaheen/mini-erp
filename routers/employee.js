@@ -143,7 +143,7 @@ router.delete("/employees/:employeeId", auth, async (req, res) => {
   }
 });
 
-// Employee endpoint - Get all employees
+//Get all employees endpoint
 router.get("/employees", auth, async (req, res) => {
   try {
     // Check if the authenticated user has the privilege to view all employees
@@ -160,4 +160,30 @@ router.get("/employees", auth, async (req, res) => {
   }
 });
 
+//Get employee details endpoint - by id
+router.get("/employees/:employeeId", auth, async (req, res) => {
+  const authenticatedEmployeeId = req.employee.id;
+  const requestedEmployeeId = parseInt(req.params.employeeId);
+
+  try {
+    // Check if the authenticated user has the privilege to access employee details
+    if (req.employee.role !== "SUPER_ADMIN" && req.employee.role !== "HR") {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const employee = await prisma.employee.findUnique({
+      where: { id: requestedEmployeeId },
+      include: { tasks: true, salaryHistories: true },
+    });
+
+    if (!employee) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    return res.json(employee);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
 module.exports = router;
