@@ -115,4 +115,26 @@ router.patch("/employees/:employeeId", auth, async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+
+//Delete employee endpoint
+router.delete("/employees/:employeeId", auth, async (req, res) => {
+  const employeeId = parseInt(req.params.employeeId);
+
+  try {
+    // Check if the authenticated user has the privilege to delete employees
+    if (req.employee.role !== "SUPER_ADMIN" && req.employee.role !== "HR") {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    await prisma.employee.delete({
+      where: { id: employeeId },
+    });
+
+    return res.sendStatus(204);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;
